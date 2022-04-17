@@ -20,7 +20,3 @@ myFunc()
 .then(v => {
     log(v); // arr output
 });
-
-
-
-
