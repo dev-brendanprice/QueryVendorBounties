@@ -1,16 +1,21 @@
-var log = console.log.bind();
+var log = console.log.bind(console);
 
 const myFunc = async () => {
-    var bountiesOnVendor = [],
-        VENDORHASH = 672118013;
+    let bountiesOnVendor = [],
+        VENDORHASH = 672118013,
+        platformLanguage = window.navigator.language.split('-')[0];
 
-    var definitionsForItems = await axios.get('https://www.bungie.net/common/destiny2_content/json/en/DestinyInventoryItemDefinition-cb4bec6f-e2b6-4f44-8593-cfd0255b89f2.json', {header: 'Access-Control-Allow-Origin: *'}),
+    let manifest = await axios.get(`https://www.bungie.net/Platform/Destiny2/Manifest/`),
+        itemDefinitionSuffix = manifest.data.Response.jsonWorldComponentContentPaths[platformLanguage].DestinyInventoryItemDefinition,
+        vendorDefinitionSuffix = manifest.data.Response.jsonWorldComponentContentPaths[platformLanguage].DestinyVendorDefinition;
+
+    let definitionsForItems = await axios.get(`https://www.bungie.net/${itemDefinitionSuffix}`, {header: 'Access-Control-Allow-Origin: *'}),
         inventoryItemDefinitions = definitionsForItems.data;
 
-    var definitionsForVendors = await axios.get('https://www.bungie.net/common/destiny2_content/json/en/DestinyVendorDefinition-cb4bec6f-e2b6-4f44-8593-cfd0255b89f2.json', {header: 'Access-Control-Allow-Origin: *'}),
+    let definitionsForVendors = await axios.get(`https://www.bungie.net/${vendorDefinitionSuffix}`, {header: 'Access-Control-Allow-Origin: *'}),
         vendor = definitionsForVendors.data[VENDORHASH];
 
-    for (var item of vendor.itemList) {
+    for (let item of vendor.itemList) {
         inventoryItemDefinitions[item.itemHash].itemType===26 ? bountiesOnVendor.push(item) : null;
     };
     return bountiesOnVendor;
@@ -18,5 +23,5 @@ const myFunc = async () => {
 
 myFunc()
 .then(v => {
-    log(v); // arr output
+    log(v);
 });
