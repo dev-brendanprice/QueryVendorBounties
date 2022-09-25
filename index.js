@@ -16,12 +16,12 @@ const myFunc = async () => {
         vendor = definitionsForVendors.data[VENDORHASH];
 
     for (let item of vendor.itemList) {
-        inventoryItemDefinitions[item.itemHash].itemType===26 ? bountiesOnVendor.push(item) : null;
+        
+        let itemDefinition = inventoryItemDefinitions[item.itemHash];
+        if (itemDefinition.itemType===26) {
+            log(`Item Hash: ${item.itemHash}`, itemDefinition.displayProperties);
+        };
     };
-    return bountiesOnVendor;
 };
 
-myFunc()
-.then(v => {
-    log(v);
-});
+myFunc();
