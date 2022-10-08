@@ -1,9 +1,18 @@
-var log = console.log.bind(console);
+import { vendorLabels } from './labels.js';
 
-async function queryVendorBounties(vendorHash, stackUniqueLabel) {
-    
+document.addEventListener('DOMContentLoaded', () => {
+
+    queryVendorBounties(3347378076);
+
+});
+
+
+async function queryVendorBounties(vendorHash) {
+
+    const log = console.log.bind(console);
+
     let bountiesOnVendor = 0,
-        VENDORHASH = vendorHash; // Set to your chosen vendor hash
+        commonSubstringLabel = vendorLabels[vendorHash];
 
     // Fetch manifest
     const manifest = await axios.get(`https://www.bungie.net/Platform/Destiny2/Manifest/`);
@@ -16,9 +25,25 @@ async function queryVendorBounties(vendorHash, stackUniqueLabel) {
           inventoryItemDefinitions = definitionsForItems.data;
 
     const definitionsForVendors = await axios.get(`https://www.bungie.net/${suffixForVendorDefinitions}`, { header: 'Access-Control-Allow-Origin: *' }), 
-          vendorData = definitionsForVendors.data[VENDORHASH];
+          vendorData = definitionsForVendors.data[vendorHash];
 
-    // Dev
+    // Display all bounties
+    for (let v of Object.keys(inventoryItemDefinitions)) {
+
+        if (inventoryItemDefinitions[v].itemType === 26) {
+
+            if (inventoryItemDefinitions[v].inventory.stackUniqueLabel.includes(`${commonSubstringLabel}`)) {
+                log(`.`);
+                log(`Item Hash: ${v},`, inventoryItemDefinitions[v].inventory.stackUniqueLabel);
+                log(inventoryItemDefinitions[v]);
+                log(`https://data.destinysets.com/i/InventoryItem/InventoryItem:${v}#`);
+                log(`.`);
+                bountiesOnVendor++;
+            };
+        };
+    };
+
+    // Only display non-repeatable bounties
     // vendorData.itemList.forEach(v => {
     //     if (inventoryItemDefinitions[v.itemHash].itemType === 26) {
     //             log(`.`);
@@ -30,24 +55,5 @@ async function queryVendorBounties(vendorHash, stackUniqueLabel) {
     //     };
     // });
 
-    // Iterate over items in the itemList of the specified vendor
-    for (let v of Object.keys(inventoryItemDefinitions)) {
-
-        if (inventoryItemDefinitions[v].itemType === 26) {
-
-            if (inventoryItemDefinitions[v].inventory.stackUniqueLabel.includes(`${stackUniqueLabel}`)) {
-                log(`.`);
-                log(`Item Hash: ${v},`, inventoryItemDefinitions[v].inventory.stackUniqueLabel);
-                log(inventoryItemDefinitions[v]);
-                log(`https://data.destinysets.com/i/InventoryItem/InventoryItem:${v}#`);
-                log(`.`);
-                bountiesOnVendor++;
-            };
-        };
-    };
-
-    log(`Amount of Bounties: ${bountiesOnVendor}`);
+    log(`Total Bounties: ${bountiesOnVendor}`);
 };
-
-// param1 = vendor hash, param2 = substring in common from stackUniqueLabel
-queryVendorBounties(3347378076, 'gambit');
